@@ -1,6 +1,8 @@
-FROM harbor.chaimeleon-eu.i3m.upv.es/chaimeleon-library-batch/ubuntu-python:latest
+ARG BASE_IMG=ubuntu-python:latest
 
-LABEL name="extract_info_dataset"
+FROM $BASE_IMG
+
+LABEL name="extract-info-dataset"
 LABEL version="0.1"
 
 COPY extract_info_dataset.py /opt/extract_info_dataset/

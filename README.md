@@ -1,6 +1,17 @@
-# Extract information fro mone or more datasets
+# Extract information from one or more datasets
 
 This repository contains the necessary files needed to create a repository compliant Docker image that allows the execution of the datasets information extractor.
+
+## Building
+
+This application is based on the ubuntu-python Docker image that contains all the necessary setup to be compliant to our repository's rules.
+Since this image can be located in various Docker repositories, we allow the specification of the path of the base image when building with Docker.
+The following command can be used to create the image (using the Harbor in CHAIMELEON as the Docker repository, change it as needed):
+```
+   docker build --tag extract-info-dataset:latest --build-arg BASE_IMG=harbor.chaimeleon-eu.i3m.upv.es/chaimeleon-library-batch/ubuntu-python:latest -f Dockerfile ./
+```
+
+## Execution
 
 The first argument has to be the path where the datasets are.
 Following the path, you can optionally also pass one or more of these arguments:
