@@ -2,6 +2,8 @@ import argparse
 import os
 import glob
 import pydicom
+import pickle
+import os
 
 #***************************************************************************************************************************
 #The function "filter_info_dataset" assumes that the Dataset directory structure is as follows: 
@@ -114,26 +116,47 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--manufacturers', action='store_true', help='It Shows all manufacturers in a dataset.') 
     parser.add_argument('-b', '--bodyparts', action='store_true', help='It Shows all body parts included in a dataset.') 
     parser.add_argument('-s', '--numberseries', action='store_true', help='It Shows number of series.') 
+    parser.add_argument('-o', '--output', help='Out File') 
     
     
     
     parser.add_argument('path', help='Root of the directory to analise.')
     args = parser.parse_args()
+
+    f = None
+    if args.output:
+        p = os.path.expandvars(args.output)
+        print(p)
+        path = os.path.dirname(p)
+        os.makedirs(path, exist_ok=True)
+        f = open(p, "w+")
+
         
     list_manufacturers, list_bodyparts, list_series  = extract_info_dataset(args.verbose, args.path, args.manufacturers, args.bodyparts, args.numberseries)
-        
+
+
+
     print("\n")
     if args.manufacturers:
         print("\nList of Manufacturers:  ", end='')
         print(list_manufacturers)
+        if f:
+            pickle.dump(list_manufacturers, f, pickle.HIGHEST_PROTOCOL)
         
     if args.bodyparts:
         print("\nList of Body Parts:  ", end='')
         print(list_bodyparts)
+        if f:
+            pickle.dump(list_bodyparts, f, pickle.HIGHEST_PROTOCOL)
 
 
     if args.numberseries:
         print("\nNumber of Series:  ",end='')
         print(len(list_series))
+        if f:
+            pickle.dump(list_series, f, pickle.HIGHEST_PROTOCOL)
+    
+    if f:
+        f.close()
 
  
