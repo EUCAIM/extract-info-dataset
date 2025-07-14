@@ -2,7 +2,7 @@ import argparse
 import os
 import glob
 import pydicom
-import pickle
+import json
 import os
 
 #***************************************************************************************************************************
@@ -135,28 +135,27 @@ if __name__ == '__main__':
     list_manufacturers, list_bodyparts, list_series  = extract_info_dataset(args.verbose, args.path, args.manufacturers, args.bodyparts, args.numberseries)
 
 
+    todmp = {}
 
     print("\n")
     if args.manufacturers:
         print("\nList of Manufacturers:  ", end='')
         print(list_manufacturers)
-        if f:
-            pickle.dump(list_manufacturers, f, pickle.HIGHEST_PROTOCOL)
+        todmp["list_manufacturers"] = list_manufacturers
         
     if args.bodyparts:
         print("\nList of Body Parts:  ", end='')
         print(list_bodyparts)
-        if f:
-            pickle.dump(list_bodyparts, f, pickle.HIGHEST_PROTOCOL)
+        todmp["list_bodyparts"] = list_bodyparts
 
 
     if args.numberseries:
         print("\nNumber of Series:  ",end='')
         print(len(list_series))
-        if f:
-            pickle.dump(list_series, f, pickle.HIGHEST_PROTOCOL)
+        todmp["list_series"] = list_series
     
     if f:
+        json.dump(todmp,f,indent=2)
         f.close()
 
  
