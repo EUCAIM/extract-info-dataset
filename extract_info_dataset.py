@@ -16,12 +16,12 @@ import os
 #		|		|
 #		|		-- STUDY 1
 #		|		|	|
-#		|		|	-- SERIE 1
+#		|		|	-- SERIES 1
 #		|		|	|	|
 #		|		|	|	-- DICOM FILE 1(.dcm extension)
 #		|		|	|	-- DICOM FILE 2(.dcm extension)
 #		|		|	|	-- ..
-#		|		|	-- SERIE 2
+#		|		|	-- SERIES 2
 #		|		|	-- ...
 #		|		-- STUDY 2
 #		|		|	-- ...
@@ -35,7 +35,7 @@ import os
 # Output:
 
 #***************************************************************************************************************************
-def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, numberseries):
+def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, numberseries, alldicoms):
     #Dictionary with the results extracted from the datalake (path)
     list_manufacturers = []
     list_bodyparts = []    
@@ -62,7 +62,7 @@ def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, num
                 if os.path.isdir(os.path.join(dir_patient_case, name_dir_study)):
                     dir_study = os.path.join(dir_patient_case, name_dir_study)
                     if verbose: print("****Processing Study Directory: " + dir_study)
-                    #Extract Serie Subdirs of a given Study if the directory has access permision
+                    #Extract Series Subdirs of a given Study if the directory has access permision
                     if not os.access(dir_study, os.R_OK):
                         print(F"Access forbiden to this folder {dir_study}")
                         print("The process has been canceled");
@@ -70,9 +70,9 @@ def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, num
                     for name_dir_serie in os.listdir(dir_study):
                         if os.path.isdir(os.path.join(dir_study, name_dir_serie)):
                             dir_serie = os.path.join(dir_study, name_dir_serie)
-                            if verbose: print("******Processing Serie Directory: " + dir_serie)
+                            if verbose: print("******Processing Series Directory: " + dir_serie)
                            
-    			            #Extract dicom files of a given serie if the directory has access permision
+    			            #Extract dicom files of a given series if the directory has access permision
                             if not os.access(dir_serie, os.R_OK):
                                 print(F"Access forbiden to this folder {dir_serie}")
                                 print("The process has been canceled");
@@ -93,7 +93,6 @@ def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, num
                                         if verbose: print("**********The DICOM tag 0018,0015 (Body Part) is not defined in the DicOm file")
                                         tag_0018_0015 = "Undefined"
                                     if not tag_0018_0015 in list_bodyparts: list_bodyparts.append(tag_0018_0015)
-                                    
                                 
                                 if (manufacturers):
                                     if (0x00080070) in dcm: # TAG Manufacturer exists in DICOM file
@@ -106,10 +105,12 @@ def extract_info_dataset(verbose, ROOT_DATASET_DIR, manufacturers,bodyparts, num
                                         tag_0008_0070 = "Undefined"
                                     if not tag_0008_0070 in list_manufacturers: list_manufacturers.append(tag_0008_0070)
                                     
-                                            
-                                            
+                                if (not alldicoms):
+                                    break
+                                     
     return list_manufacturers, list_bodyparts, list_series
-    
+
+
 if __name__ == '__main__':	
     parser = argparse.ArgumentParser(prog='extract_info_dataset.py', description='It Extracts Information of CHAIMELEON Dataset from a base directory.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Show all info on screen about the creation process of the dictionaries.') 
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--bodyparts', action='store_true', help='It Shows all body parts included in a dataset.') 
     parser.add_argument('-s', '--numberseries', action='store_true', help='It Shows number of series.') 
     parser.add_argument('-o', '--output', help='Out File') 
-    
+    parser.add_argument('-a', '--alldicoms', action='store_true', help='Read all DICOM files in the series. It is usually not required, only the first one.')
     
     
     parser.add_argument('path', help='Root of the directory to analise.')
@@ -132,8 +133,7 @@ if __name__ == '__main__':
         f = open(p, "w+")
 
         
-    list_manufacturers, list_bodyparts, list_series  = extract_info_dataset(args.verbose, args.path, args.manufacturers, args.bodyparts, args.numberseries)
-
+    list_manufacturers, list_bodyparts, list_series  = extract_info_dataset(args.verbose, args.path, args.manufacturers, args.bodyparts, args.numberseries, args.alldicoms)
 
     todmp = {}
 
@@ -147,7 +147,6 @@ if __name__ == '__main__':
         print("\nList of Body Parts:  ", end='')
         print(list_bodyparts)
         todmp["list_bodyparts"] = list_bodyparts
-
 
     if args.numberseries:
         print("\nNumber of Series:  ",end='')
